@@ -1,0 +1,23 @@
+&-about {
+    width: 100%;
+
+    .about-brand {
+        .title {
+            margin: 1px;
+            line-height: 1.4;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.4;
+            margin: 2px 0;
+        }
+        img {
+            object-fit: contain;
+            width: 100%;
+        }
+    }
+
+    .vote-info-section {
+        background: #ddd;
+    }
+} 

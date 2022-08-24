@@ -1,0 +1,23 @@
+%flex {
+    display: flex;
+    flex-direction: column;
+}
+
+$high: 9999999999999999999999999;
+$medium: 99999999;
+$low: 99;
+$negative: -1;
+
+
+$baseDark: #1d3547;
+$baseLight: #fff;
+$theme: #00a05f;
+$dark: #111;
+$white: rgb(255, 254, 254);
+$light: #ddd;
+$lightTheme: lighten($color: $theme, $amount: 5);
+$darkTheme: darken($color: $theme, $amount: 6);
+$dark2: #091015;
+:root {
+    --theme: #{$theme};
+}

@@ -1,0 +1,153 @@
+%card {
+    @include media(">tablet") {
+        justify-content: space-around;
+    }
+
+    @include media(">tablet") {
+        justify-content: center;
+    }
+
+    @include media(">monitor") {
+        justify-content: unset;
+    }
+
+    .card-container {
+        margin-bottom: 1rem;
+        box-shadow: 1px 2px 8px 3px rgb(208, 208, 208);
+        // height: fit-content;
+        position: relative;
+        border-radius: 30px 30px 0 0;
+        width: 100%;
+        @include media(">tablet") {
+            width: 45%;
+        }
+
+        @include media(">1023px") {
+            width: 30%;
+        }
+
+        @include media(">monitor") {
+            width: fit-content;
+        }
+
+        .card {
+            height: 100%;
+            @extend %flex;
+            .title {
+                font-size: 18px;
+                text-align: center;
+                @extend %flex;
+                // font-family: poppins !important;
+            }
+            .image-container {
+                height: 300px;
+                @extend %flex;
+                img {
+                    height: 100%;
+                    width: 100%;
+                    object-fit: cover;
+                    margin: 0;
+                }
+            }
+
+            .details {
+                margin-top: auto;
+                padding: 0.8rem 0.4rem;
+                @extend %flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+}
+
+&-contestants {
+    flex-grow: 1;
+    .profile-container {
+        .profiles {
+            @extend %card;
+        }
+    }
+
+    .contestant-page {
+        .profile-container {
+            @include media(">=desktop") {
+                max-width: 886px;
+                margin: 0 auto;
+                width: 100%;
+            }
+            .navbar {
+                padding: 1rem 0;
+                a,
+                span {
+                    text-decoration: none;
+                    font-family: poppins;
+                    margin-right: 4px;
+                }
+            }
+
+            .profile-name {
+                @extend %flex;
+                margin: auto;
+
+                .title {
+                    font-weight: 900;
+                    font-size: 35px;
+                    letter-spacing: 1px;
+                }
+
+                .insta-link {
+                    border-bottom: 1px solid rgb(160, 158, 158);
+                    padding: 1rem 0;
+                    margin-bottom: 8px;
+                }
+
+                button {
+                    color: black;
+                    background-color: #eee !important;
+                }
+            }
+
+            .profile-desc {
+                margin-top: 8px;
+                .card {
+                    border-radius: 30px;
+                    width: 100%;
+
+                    @include media(">=tablet") {
+                        box-shadow: 1px 4px 9px 2px rgba(228, 228, 228, 0.801);
+                    }
+                }
+                .title {
+                    text-transform: uppercase;
+                    font-size: 20px;
+                    br {
+                        display: none;
+                    }
+                    @include media(">=tablet") {
+                        font-size: 40px;
+                        br {
+                            display: block;
+                        }
+                    }
+                }
+
+                .lead {
+                    font-size: 15px;
+                    font-family: poppins;
+                    text-transform: capitalize;
+                }
+            }
+
+            .image-container {
+                padding: 0;
+                background-position: center;
+                background-size: cover;
+                background-repeat: no-repeat;
+                height: 23rem;
+                border-radius: 40px;
+                border: 1px solid white;
+            }
+        }
+    }
+}

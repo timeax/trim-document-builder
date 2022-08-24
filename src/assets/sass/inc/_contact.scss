@@ -1,0 +1,29 @@
+&-contact {
+    flex-grow: 1;
+    overflow: visible;
+    background-color: $baseLight;
+    .contact-container {
+        background-color: $baseLight;
+        // padding: 1rem 0;
+        * {
+            overflow: visible;
+        }
+        .contact-form {
+            margin: auto;
+            @extend %flex;
+            width: 80%;
+
+            .form {
+                @extend %flex;
+
+                .contact-input {
+                    margin-bottom: 2rem;
+                }
+            }
+
+            @include media(">tablet") {
+                width: 60%;
+            }
+        }
+    }
+}

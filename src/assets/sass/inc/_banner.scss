@@ -1,0 +1,62 @@
+.app-hero-section {
+    position: relative;
+    background: rgba(0, 0, 0, 0.746);
+
+    &.video-background {
+        position: relative;
+        height: 50vh;
+        video {
+            position: relative;
+            width: 100vw;
+            height: 50vh;
+            object-fit: cover;
+        }
+
+        @include media(">desktop") {
+            position: static;
+            height: 100vh;
+            video {
+                position: fixed;
+                height: 100vh;
+                top: 0;
+                left: 0;
+                z-index: 1;
+            }
+        }
+    }
+
+    &.image-background {
+        position: relative;
+        height: 50vh;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+
+        @include media(">tablet") {
+            height: 60vh;
+        }
+
+        .overlay {
+            align-items: center;
+            color: white;
+            @include media(">tablet") {
+                .desc {
+                    justify-content: center;
+                    align-items: center;
+                }
+            }
+        }
+    }
+
+    .overlay {
+        z-index: $medium;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        pointer-events: none;
+        display: flex;
+        background: rgba(0, 0, 0, 0.746);
+    }
+}

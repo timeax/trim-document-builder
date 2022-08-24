@@ -1,0 +1,194 @@
+footer {
+    background-color: $dark2;
+    z-index: $low;
+    padding: 1.6rem 0;
+
+    .container {
+        width: auto;
+    }
+
+    .footer-flex {
+        display: flex;
+        flex-wrap: wrap;
+
+        &-col {
+            @extend %flex;
+            width: 100%;
+            color: rgb(137, 137, 137);
+            font-size: 16px;
+            margin-bottom: 0.8rem;
+
+            @include media(">=desktop") {
+                width: 33%;
+                font-size: 14px;
+            }
+
+            a {
+                color: rgb(137, 137, 137);
+            }
+            .title {
+                color: rgb(223, 223, 223);
+            }
+            &-1 {
+                margin-bottom: 0.4rem;
+                @include media(">=tablet") {
+                    width: 50%;
+                }
+
+                @include media(">=desktop") {
+                    width: 33%;
+                }
+                .header {
+                    align-items: center;
+                    .title {
+                        margin-left: 2px;
+                        font-family: poppins;
+                        font-size: 20px;
+                        letter-spacing: 1.8px;
+                    }
+                    img {
+                        width: 40px;
+                    }
+                }
+
+                .social-links {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+
+                    @include media(">=tablet") {
+                        justify-content: unset;
+                        a {
+                            margin-right: 0.8rem;
+                        }
+                    }
+                    a {
+                        color: $light !important;
+                        font-size: 16px;
+                    }
+                }
+
+                .address-box {
+                    @extend %flex;
+                    margin-top: 4px;
+
+                    span {
+                        line-height: 1.5;
+                    }
+                }
+            }
+
+            &-2 {
+                @include media(">=tablet") {
+                    width: 50%;
+                }
+                @include media(">=desktop") {
+                    width: 30%;
+                }
+                .quick-links {
+                    display: flex;
+
+                    @include media(">=tablet") {
+                        // width: 0%;
+                        margin-left: 1rem;
+                        justify-content: space-between;
+                    }
+
+                    ul {
+                        padding: 0;
+                        margin: 0 1rem;
+                        list-style: none;
+                        &:first-child {
+                            margin-left: 0;
+                        }
+
+                        li {
+                            display: flex;
+                            a {
+                                padding: 0.7rem 0;
+                                // font-size: 12px;
+                                text-decoration: none;
+                            }
+                        }
+                    }
+                }
+            }
+
+            &-3 {
+                @include media(">=tablet") {
+                    width: 100%;
+                }
+                @include media(">=desktop") {
+                    padding-left: 0.6rem;
+                    width: 33%;
+                }
+
+                @extend %flex;
+                .newsletter {
+                    @extend %flex;
+                    @include media(">=tablet") {
+                        flex-direction: row;
+                    }
+                    @include media(">=desktop") {
+                        align-items: flex-end;
+                        flex-direction: column;
+                    }
+                    span {
+                        br {
+                            display: none;
+                        }
+                        @include media(">=desktop") {
+                            text-align: right;
+                            display: block;
+
+                            br {
+                                display: block;
+                            }
+                        }
+                    }
+
+                    .title-container {
+                        @extend %flex;
+
+                        @include media(">=desktop") {
+                            align-items: flex-end;
+                        }
+                    }
+
+                    .form {
+                        display: flex;
+                        margin-top: 1rem;
+                        @include media(">=tablet") {
+                            margin-left: auto;
+                        }
+
+                        input {
+                            padding: 0.5rem !important;
+                            background-color: rgba(221, 221, 221, 0.205);
+                            color: rgb(181, 181, 181);
+                        }
+
+                        button {
+                            background: $theme !important;
+                            color: white !important;
+                            border-radius: 0px !important;
+                            font-size: 16px !important;
+                        }
+                    }
+                }
+            }
+        }
+
+        .copyright {
+            color: rgb(200, 197, 197);
+            font-size: 12px;
+            width: 100%;
+            margin-top: 0.5rem;
+
+            @include media(">=desktop") {
+                margin-top: 1px;
+                text-align: right;
+            }
+        }
+    }
+}

@@ -1,0 +1,166 @@
+.header-container {
+    z-index: $high;
+    header {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #a9a9a92f;
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: black;
+
+        .container {
+            flex-grow: 1;
+        }
+
+        &.video-bg {
+            @include media(">=desktop") {
+                background: transparent;
+            }
+        }
+        nav {
+            flex-grow: 1;
+            display: flex;
+            .container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                .navbar-brand {
+                    img {
+                        width: 150px;
+                    }
+                }
+                .navbar-container {
+                    position: fixed;
+                    height: 100%;
+                    width: 100%;
+                    top: 0;
+                    left: 0;
+                    z-index: $high;
+                    background-color: rgba(17, 17, 17, 0.544);
+                    transition: all 0.3s ease-in 0s;
+
+                    @include media(">monitor") {
+                        position: relative;
+                        height: auto;
+                        width: auto;
+                        z-index: auto;
+                        background-color: transparent;
+                        transition: none;
+                    }
+
+                    &.hide {
+                        width: 0px;
+                        .nav {
+                            pointer-events: none;
+                            visibility: hidden;
+                        }
+
+                        @include media(">monitor") {
+                            width: auto;
+                            .nav {
+                                pointer-events: all;
+                                visibility: visible;
+                            }
+                        }
+                    }
+                    .nav {
+                        @extend %flex;
+                        list-style: none;
+                        background-color: rgb(50, 50, 50);
+                        color: white;
+                        align-items: center;
+                        padding-top: 15%;
+                        height: 100%;
+                        width: 50%;
+                        transition: all 0.3s ease-in 0s;
+
+                        .nav2 {
+                            @include media(">monitor") {
+                                margin-left: 1.5rem;
+                            }
+
+                            button.vote-button {
+                                @include media('>=tablet') {
+                                    font-size: 1.5em;
+                                }
+
+                                @include media(">monitor") {
+                                    font-size: 0.875rem;
+                                }
+                            }
+                        }
+
+                        @include media(">monitor") {
+                            background-color: transparent;
+                            padding: 0;
+                            width: auto;
+                            flex-direction: row;
+                            transition: none;
+                        }
+
+                        &:first-child::before {
+                            // content: "Divapee";
+                            display: block;
+                            padding: 0.6rem;
+                            font-size: 16px;
+                            // font-weight: 800;
+                            letter-spacing: 1px;
+                            @include media(">monitor") {
+                                content: none;
+                                padding: 0;
+                            }
+                        }
+
+                        .nav-item {
+                            display: flex;
+                            border-bottom: 1px solid rgb(19, 18, 18);
+                            margin-bottom: 1rem;
+                            @include media(">=tablet") {
+                                margin-bottom: 1.8rem;
+                            }
+                            @include media(">monitor") {
+                                // font-size: 13px;
+                                border: none;
+                                margin-bottom: 0px;
+                            }
+
+                            &.current {
+                                a {
+                                    color: #ba9649;
+                                }
+                            }
+
+                            &:hover {
+                                a {
+                                    color: rgb(255, 255, 255);
+                                }
+                            }
+                            .nav-link {
+                                color: rgb(186, 186, 186);
+                                text-decoration: none;
+                                padding: 0.6rem 0.8rem;
+                                flex-grow: 1;
+                                @include media(">=tablet") {
+                                    font-size: 1.8em;
+                                }
+                                @include media(">monitor") {
+                                    font-size: 13px;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                .navbar-toggler {
+                    // border: 1px solid rgba(128, 128, 128, 0.355) !important;
+                    border-radius: 0 !important;
+                    @include media(">monitor") {
+                        display: none;
+                    }
+
+                    color: white;
+                }
+            }
+        }
+    }
+}

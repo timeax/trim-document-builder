@@ -1,0 +1,75 @@
+&-home {
+    width: 100%;
+    background-color: white;
+    .overlay {
+        justify-content: center;
+        flex-direction: column;
+        pointer-events: all !important;
+        .desc {
+            width: 100%;
+            @include media(">tablet") {
+                width: 65%;
+            }
+
+            @include media(">monitor") {
+                width: 55%;
+            }
+            .sub-heading {
+                font-size: 1rem;
+                text-transform: uppercase;
+            }
+
+            p {
+                font-weight: 600;
+                margin-bottom: 1rem !important;
+            }
+
+            h1 {
+                font-weight: 800;
+            }
+
+            h1,
+            h3,
+            p {
+                padding: 0;
+                color: white;
+                line-height: 1.5;
+                margin: 0.3rem 0;
+            }
+        }
+    }
+
+    .about-brand {
+        background-color: black;
+        color: white;
+
+        img {
+            border-radius: 0px;
+        }
+    }
+
+    .image-area {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+            width: 99%;
+        }
+    }
+
+    .video-gallery {
+        .video-frame {
+            width: 95%;
+            height: 120px;
+            @include media(">450px") {
+                width: 98%;
+                height: 200px;
+            }
+        }
+    }
+
+    .blog-section {
+        background-color: #ddd;
+    }
+}

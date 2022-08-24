@@ -1,0 +1,47 @@
+&-records {
+    flex-grow: 1;
+    background-color: $dark;
+    .contestant-container {
+        display: flex;
+        margin-bottom: 1rem;
+
+        .profile {
+            .image-container {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                background-position: center;
+                background-size: cover;
+                background-repeat: no-repeat;
+            }
+        }
+
+        .progress-container {
+            @extend %flex;
+            flex-grow: 1;
+            margin-left: 5px;
+
+            .progress-bar {
+                margin-top: auto;
+                display: flex;
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.601);
+                border-radius: 999px;
+                .thumb {
+                    height: 1.5rem;
+                    background-color: $theme;
+                    width: 0%;
+                    border-radius: 999px;
+                }
+            }
+            .title {
+                display: flex;
+                span {
+                    margin-right: 4px;
+                }
+                align-items: center;
+                margin-bottom: 1.3rem;
+            }
+        }
+    }
+}

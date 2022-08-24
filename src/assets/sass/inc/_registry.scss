@@ -1,0 +1,90 @@
+&-registry {
+    position: fixed;
+    z-index: $high;
+    height: 100vh;
+    width: 100vw;
+    background: rgb(0, 0, 0);
+    @extend %flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    .form-container {
+        width: 100%;
+        height: 90%;
+        background: #323232e4;
+        border-radius: 20px;
+        padding: 0rem 1rem;
+        min-height: 20rem;
+        max-height: max-content;
+        overflow: auto;
+        @extend %flex;
+
+        @include media('>=tablet') {
+            width: 80%;
+            height: fit-content;
+        }
+
+        @include media('>=desktop') {
+            width: 500px;
+            height: 550px;
+        }
+
+
+        &::-webkit-scrollbar-thumb {
+            background: #242424;
+            // border-radius: 10px;
+            &:hover {
+                background: #000000;
+            }
+        }
+
+        .form {
+            width: 85%;
+            padding: 3rem 0;
+            height: fit-content;
+            position: relative;
+            @extend %flex;
+
+            margin: auto;
+            .registry-input {
+                .css-9ddj71-MuiInputBase-root-MuiOutlinedInput-root {
+                    background-color: #56535347;
+                }
+                margin-bottom: 1.5rem;
+                * {
+                    color: rgb(180, 180, 180) !important;
+                } // width: ;
+
+                a {
+                    font-size: 15px;
+                }
+
+                input:-internal-autofill-selected {
+                    background-color: transparent !important;
+                }
+            }
+            .alert {
+                position: absolute;
+                top: 0;
+                width: 100%;
+            }
+            .header {
+                @extend %flex;
+                align-items: center;
+                justify-content: center;
+                img {
+                    width: 120px;
+                }
+            }
+
+            .title {
+                font-size: 1.5em;
+                margin: 1px 0 2rem 0;
+
+                @include media('>=tablet') {
+                    font-size: 2em;
+                }
+            }
+        }
+    }
+}
