@@ -1,0 +1,1 @@
+export declare function Test(r: boolean): string;

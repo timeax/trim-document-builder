@@ -1,0 +1,34 @@
+{@import { Html, Head } from 'trim.js/nodes'}
+{@import { useState } from 'trim.js'}
+{@use { Button } from './button'}
+{@import { styles, Test } from './index.js'}
+
+<Html>
+    <Head title='Home' />
+    <div>
+        this is a test, {{tests}}
+        <span class='btn btn-dark btn-sm mx-2' :style={{{ color: '' }}} @click={console.log('clicked')}>
+            colors
+        </span>
+        <Test />
+        <Button
+            type='email'
+            textStyle={{{ name: 'string' }}}
+            text='password'
+            style={{{ backgroundAttachment: 'fixed', background: 'red' }}} />
+        {{tests}}
+    </div>
+</Html>
+
+<{
+    // this is a comment
+    const tests = ' ofcourse'
+    const [color, setColor] = useState('white')
+
+    /**@type {import('trim.js').PropTypes.CSSProperties} */
+    let style = { color: '', background: '' }
+
+    if(test) {
+
+}
+}>

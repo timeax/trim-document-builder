@@ -1,0 +1,30 @@
+{
+  "name": "trim-document-builder",
+  "version": "0.0.0",
+  "description": "Document builder for vscode",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "link": "npm link trim-engine @timeax/utilities",
+    "watch": "cd src && tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timeax/divapee.git"
+  },
+  "author": "David Okpako",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/timeax/divapee/issues"
+  },
+  "homepage": "https://github.com/timeax/divapee#readme",
+  "devDependencies": {
+    "@types/charcodes": "^0.2.0",
+    "@types/eslint": "^8.44.1"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.22.7",
+    "charcodes": "^0.2.0",
+    "eslint": "^8.46.0"
+  }
+}
