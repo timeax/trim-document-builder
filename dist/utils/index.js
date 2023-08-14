@@ -39,8 +39,9 @@ function getDoc(originalText, uri) {
 exports.getDoc = getDoc;
 function getInterfaces(originalText, name, jsDoc) {
     const propType = getObject(originalText, name, false);
+    // console.log(propType, name)
     if (propType)
-        jsDoc.push(propType);
+        jsDoc.push('//----', '//-------', propType);
     return propType;
 }
 exports.getInterfaces = getInterfaces;
@@ -48,6 +49,7 @@ function getObject(code, name, replace = true) {
     const regex = RegExp(`(${name}((\\s?|\\n?)*)\\.((\\s?|\\n?)*)propTypes((\\s?|\\n?)*)\\=((\\s?|\\n)*))\\{`);
     const regex2 = RegExp(`${name}((\\s?|\\n?)*)\\.propTypes((\\s?|\\n?)*)\\=((\\s?|\\n)*)`);
     let list = code.match(regex);
+    let prefix = `type ${name} = `;
     //-------------
     if (list) {
         list = list.filter(item => item && item.startsWith(name)
@@ -57,7 +59,6 @@ function getObject(code, name, replace = true) {
         let match = list[list.length - 1], typings = match.replace(regex2, ' '), start = code.lastIndexOf(match), end = start + match.length;
         //-------
         let parsed = parseObj(code, [start, end,]);
-        let prefix = `interface ${name} `;
         let prefix2 = `let _______iididi = `;
         let propType = prefix + typings + parsed;
         //--------
@@ -67,6 +68,8 @@ function getObject(code, name, replace = true) {
             ? propType.replace(prefix, '')
             : propType;
     }
+    if (!replace)
+        return prefix + '{children?: any[] | any};';
 }
 exports.getObject = getObject;
 var Context;

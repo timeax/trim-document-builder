@@ -13,7 +13,7 @@ global.TrimVsCode = {
 function getRegions(uri, content, filter = []) {
     const regions = [];
     regions.nameList = [];
-    const nodes = [];
+    let nodes = [];
     //----
     let ast;
     utilities_1.util.avoid(() => {
@@ -40,6 +40,8 @@ function getRegions(uri, content, filter = []) {
     let errors = [];
     if (ast.errors)
         errors = ast.errors;
+    if (ast.nodes)
+        nodes = ast.nodes;
     (0, editor_1.transverse)(ast, () => {
         return {
             Scriptlet(node) {

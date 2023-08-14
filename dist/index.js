@@ -30,6 +30,7 @@ exports.createTypes = exports.build = void 0;
 const utilities_1 = require("@timeax/utilities");
 const utils_1 = require("./utils");
 const displacement_1 = __importStar(require("./utils/displacement"));
+const parser_1 = require("trim-engine/parser");
 const DEFNAME = '__DefaultExport';
 function build(regions, uri, code) {
     const jsDoc = (0, utils_1.getDoc)(code, uri);
@@ -174,7 +175,8 @@ function build(regions, uri, code) {
                                     sE: true
                                 }, [props.start, props.end], code, builder);
                                 //--------------
-                                (0, utils_1.getInterfaces)(code, name, jsDoc);
+                                const type = (0, utils_1.getInterfaces)(code, name, jsDoc);
+                                // console.log(type)
                                 return builder.distort('}', region.end);
                             }
                         }
@@ -187,6 +189,7 @@ function build(regions, uri, code) {
             builder.distort(builder.get(region.end) + '}', region.end);
         }
     });
+    // console.log(jsDoc.join(''))
     return {
         doc: jsDoc.join(''),
         builder
@@ -216,22 +219,66 @@ function fillIn(fillers, [start, end], mainText, builder) {
 function createTypes(code) {
     if (!code.includes('{@export'))
         return '';
-    const names = code.match(/exports((\s?|\n?)*)\.((\s?|\n?)*)[^\.]*/gm);
-    if (!names)
-        return '';
-    return names.map(item => {
-        const name = item.trim().slice(7).trim().slice(1);
+    let exports = getNames(code);
+    //---------
+    // console.log(exports, 'there are a lot')
+    const fromProps = code.match(/exports((\s?|\n?)*)\.((\s?|\n?)*)[^\.]*/gm) || [];
+    const names = new Set([...fromProps, ...exports]);
+    // console.log(names)
+    return Array.from(names).map(item => {
+        const name = item.startsWith('exports.') ? item.trim().slice(7).trim().slice(1) : item;
         if (!validName(name))
             return '';
-        const model = (0, utils_1.getObject)(code, name);
-        if (!model)
-            return '';
+        const model = (0, utils_1.getObject)(code, name) || '{}';
         if (name === 'default')
             return `export default {} as FC<${model}>`;
         return `export var ${name}: FC<${model}>`;
     }).join('\n');
 }
 exports.createTypes = createTypes;
+function getNames(code) {
+    const names = new Set();
+    utilities_1.util.avoid(() => {
+        var _a;
+        const ast = (0, parser_1.scanner)({
+            processor: false,
+            range: true,
+            sourceFile: 'index.trx',
+            ecmaVersion: 'latest',
+        }, code);
+        (_a = ast === null || ast === void 0 ? void 0 : ast.body) === null || _a === void 0 ? void 0 : _a.forEach(item => {
+            var _a, _b;
+            if (item.type === 'JsRule' && ((_a = item.openingElement.name) === null || _a === void 0 ? void 0 : _a.name) === 'export') {
+                const params = (_b = item.openingElement.params) === null || _b === void 0 ? void 0 : _b.body;
+                const parseParams = (params) => {
+                    switch (params.type) {
+                        case "AssignmentExpression": {
+                            if (params.left.type === 'Identifier' && params.left.name === 'name') {
+                                if (params.right.type === 'Literal')
+                                    names.add(params.right.value);
+                            }
+                            break;
+                        }
+                        case "Literal": {
+                            names.add(params.value);
+                            break;
+                        }
+                    }
+                };
+                //----
+                if (params)
+                    if (params.type == 'AssignmentExpression'
+                        || params.type == 'Identifier'
+                        || params.type === 'Literal'
+                        || params.type === 'ObjectExpression')
+                        parseParams(params);
+                    else if (params.type === 'SequenceExpression')
+                        params.expressions.forEach((item) => parseParams(item));
+            }
+        });
+    });
+    return Array.from(names);
+}
 function validName(name) {
     return true;
 }

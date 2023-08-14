@@ -3,6 +3,7 @@ import { getDoc, getInterfaces, getObject } from "./utils";
 import getSearcher, { Displacement, Offset } from "./utils/displacement";
 import { EmbededRegion, Range, SourceLocation } from "./utils/regions";
 import { Elements as em } from 'trim-engine/core';
+import { scanner } from "trim-engine/parser";
 const DEFNAME = '__DefaultExport';
 import * as estree from 'estree';
 
@@ -153,7 +154,8 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
                                     sE: true
                                 }, [props.start, props.end], code, builder);
                                 //--------------
-                                getInterfaces(code, name, jsDoc);
+                                const type = getInterfaces(code, name, jsDoc);
+                                // console.log(type)
                                 return builder.distort('}', region.end);
                             }
                         }
@@ -167,6 +169,8 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
             builder.distort(builder.get(region.end) + '}', region.end)
         }
     });
+
+    // console.log(jsDoc.join(''))
 
     return {
         doc: jsDoc.join(''),
@@ -201,17 +205,64 @@ function fillIn(fillers: Fillers, [start, end]: Range, mainText: string, builder
 
 export function createTypes(code: string): string {
     if (!code.includes('{@export')) return '';
+    let exports = getNames(code);
+    //---------
+    // console.log(exports, 'there are a lot')
+    const fromProps = code.match(/exports((\s?|\n?)*)\.((\s?|\n?)*)[^\.]*/gm) || [];
 
-    const names = code.match(/exports((\s?|\n?)*)\.((\s?|\n?)*)[^\.]*/gm);
-    if (!names) return '';
-    return names.map(item => {
-        const name = item.trim().slice(7).trim().slice(1);
+    const names = new Set<string>([...fromProps, ...exports]);
+    // console.log(names)
+
+    return Array.from(names).map(item => {
+        const name = item.startsWith('exports.') ? item.trim().slice(7).trim().slice(1) : item;
         if (!validName(name)) return '';
-        const model = getObject(code, name);
-        if (!model) return '';
+        const model = getObject(code, name) || '{}';
         if (name === 'default') return `export default {} as FC<${model}>`
         return `export var ${name}: FC<${model}>`
     }).join('\n')
+}
+
+
+function getNames(code: string) {
+    const names = new Set<string>();
+    util.avoid(() => {
+        const ast = scanner({
+            processor: false,
+            range: true,
+            sourceFile: 'index.trx',
+            ecmaVersion: 'latest',
+        }, code);
+
+        ast?.body?.forEach(item => {
+            if (item.type === 'JsRule' && item.openingElement.name?.name === 'export') {
+                const params = item.openingElement.params?.body;
+                const parseParams = (params: any) => {
+                    switch (params.type) {
+                        case "AssignmentExpression": {
+                            if (params.left.type === 'Identifier' && params.left.name === 'name') {
+                                if (params.right.type === 'Literal') names.add(params.right.value as string);
+                            }
+                            break;
+                        }
+                        case "Literal": {
+                            names.add(params.value as string)
+                            break;
+                        }
+                    }
+                }
+                //----
+                if (params)
+                    if (params.type == 'AssignmentExpression'
+                        || params.type == 'Identifier'
+                        || params.type === 'Literal'
+                        || params.type === 'ObjectExpression')
+                        parseParams(params);
+                    else if (params.type === 'SequenceExpression') params.expressions.forEach((item: any) => parseParams(item as any));
+            }
+        });
+    });
+
+    return Array.from(names);
 }
 
 

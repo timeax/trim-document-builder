@@ -16,7 +16,8 @@ export function getDoc(originalText: string, uri: string): string[] {
 
 export function getInterfaces(originalText: string, name: string, jsDoc: string[]): string | void {
     const propType = getObject(originalText, name, false);
-    if (propType) jsDoc.push(propType);
+    // console.log(propType, name)
+    if (propType) jsDoc.push('//----','//-------', propType);
     return propType;
 }
 
@@ -24,6 +25,7 @@ export function getObject(code: string, name: string, replace = true): string | 
     const regex = RegExp(`(${name}((\\s?|\\n?)*)\\.((\\s?|\\n?)*)propTypes((\\s?|\\n?)*)\\=((\\s?|\\n)*))\\{`);
     const regex2 = RegExp(`${name}((\\s?|\\n?)*)\\.propTypes((\\s?|\\n?)*)\\=((\\s?|\\n)*)`)
     let list = code.match(regex) as string[] | undefined;
+    let prefix = `type ${name} = `
     //-------------
     if (list) {
         list = list.filter(item => item && item.startsWith(name)
@@ -36,7 +38,6 @@ export function getObject(code: string, name: string, replace = true): string | 
             end = start + match.length;
         //-------
         let parsed = parseObj(code, [start, end,])
-        let prefix = `interface ${name} `
         let prefix2 = `let _______iididi = `
         let propType = prefix + typings + parsed;
         //--------
@@ -46,6 +47,8 @@ export function getObject(code: string, name: string, replace = true): string | 
             ? propType.replace(prefix, '')
             : propType;
     }
+
+    if (!replace) return prefix + '{children?: any[] | any};';
 }
 
 enum Context {
