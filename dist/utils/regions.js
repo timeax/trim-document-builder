@@ -15,14 +15,28 @@ function getRegions(uri, content, filter = []) {
     regions.nameList = [];
     const nodes = [];
     //----
-    const ast = (0, parser_1.scanner)({
-        ecmaVersion: 'latest',
-        sourceFile: uri,
-        processor: false,
-        preserveParens: true,
-        loc: false,
-        range: true
-    }, content);
+    let ast;
+    utilities_1.util.avoid(() => {
+        ast = (0, parser_1.parse)({
+            ecmaVersion: 'latest',
+            sourceFile: uri,
+            processor: false,
+            preserveParens: true,
+            loc: false,
+            range: true
+        }, content);
+    }).then((e) => {
+        if (e) {
+            ast = (0, parser_1.scanner)({
+                ecmaVersion: 'latest',
+                sourceFile: uri,
+                processor: false,
+                preserveParens: true,
+                loc: false,
+                range: true
+            }, content);
+        }
+    });
     let errors = [];
     if (ast.errors)
         errors = ast.errors;

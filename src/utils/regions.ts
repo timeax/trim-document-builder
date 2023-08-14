@@ -1,6 +1,6 @@
 import { util } from '@timeax/utilities';
 import { transverse } from 'trim-engine/editor';
-import { scanner } from 'trim-engine/parser';
+import { scanner, parse } from 'trim-engine/parser';
 import { TrimAssets as as } from 'trim-engine/util';
 import { Elements as em } from 'trim-engine/core'
 
@@ -38,19 +38,35 @@ global.TrimVsCode = {
 export function getRegions(uri: string, content: string, filter: string[] = []): RegionList {
     const regions: EmbededRegion = [];
     regions.nameList = [];
-    const nodes = [] as string[];
+    let nodes = [] as string[];
     //----
-    const ast = scanner({
-        ecmaVersion: 'latest',
-        sourceFile: uri,
-        processor: false,
-        preserveParens: true,
-        loc: false,
-        range: true
-    }, content);
+    let ast: any;
+
+    util.avoid(() => {
+        ast = parse({
+            ecmaVersion: 'latest',
+            sourceFile: uri,
+            processor: false,
+            preserveParens: true,
+            loc: false,
+            range: true
+        }, content);
+    }).then((e) => {
+        if (e) {
+            ast = scanner({
+                ecmaVersion: 'latest',
+                sourceFile: uri,
+                processor: false,
+                preserveParens: true,
+                loc: false,
+                range: true
+            }, content);
+        }
+    })
 
     let errors: any = [];
     if (ast.errors) errors = ast.errors;
+    if(ast.nodes) nodes = ast.nodes
 
     transverse(ast, () => {
         return {

@@ -1,0 +1,15 @@
+{@export 'Header'}
+    <header>
+        <div class="container">
+            <div class="nav">
+                <div class="iconbox">
+                    icon
+                </div>
+
+                <div class="nav2"></div>
+            </div>
+        </div>
+    </header>
+
+    <{  }>
+{/export}

@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        // "noEmit": false,
+        "online": false,
+        "alpinejs": true,
+        "alpineShorthand": "::",
+        // "dependencies": {
+        //     "bootstrap": {
+        //         "files": []
+        //     },
+        //     "jquery": {
+        //         "files": []
+        //     }
+        // },
+
+        // "globalStyles": ""
+        "libFolder": "./resources",
+        "sourceRoot": "./"
+    },
+    "cliOptions": {
+        // "cliServer": "",
+        // "declarations": false,
+        // "outFile": "",
+        "outDir": "../public"
+    }
+    // "exclude": [],
+    // "include": []
+
+}

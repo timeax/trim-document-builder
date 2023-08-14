@@ -21,12 +21,14 @@ const Fs = require('@timeax/utilities').Fs
 
 // console.log(find.inverseOffsetAt(b))
 
-const pathA = Fs.join(__dirname, '../assets/index.trx')
-const pathB = Fs.join(__dirname, '../assets/_button.trx');
+const pathA = Fs.join(__dirname, '../assets/src/index.trx')
+// const pathB = Fs.join(__dirname, '../assets/_button.trx');
 const cA = Fs.content(pathA);
-const cB = Fs.content(pathB);
+// const cB = Fs.content(pathB);
 
-const { builder, doc } = build(getRegions(pathB, cB).regions, pathB, cB);
+const { builder, doc } = build(getRegions(pathA, cA).regions, pathA, cA);
+
+console.log(doc)
 
 const pos = 43;
 const offset = builder.offsetAt(pos);
@@ -41,6 +43,6 @@ console.log(doc.slice(
     offset + span
 ));
 
-console.log(cB.slice(pos, pos + span))
+console.log(cA.slice(pos, pos + span))
 
 console.log('passed....')
