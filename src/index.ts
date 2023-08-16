@@ -1,17 +1,19 @@
 import { Fs, util } from "@timeax/utilities";
 import { getDoc, getInterfaces, getObject } from "./utils";
-import getSearcher, { Displacement, Offset } from "./utils/displacement";
+import getSearcher from "./utils/displacement";
 import { EmbededRegion, Range, SourceLocation } from "./utils/regions";
 import { Elements as em } from 'trim-engine/core';
 import { scanner } from "trim-engine/parser";
 const DEFNAME = '__DefaultExport';
 import * as estree from 'estree';
+import { fillIn } from "./utils/filler";
 
 export function build(regions: EmbededRegion, uri: string, code: string) {
     const jsDoc = getDoc(code, uri);
     const builder = getSearcher(jsDoc);
     //---
     regions.forEach(region => {
+        if (region.languageId === 'html-attr') return;
         // ---
         let range: Range = [region.start, region.end];
         if (region.languageId === 'javascript') {
@@ -53,7 +55,7 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
                         sE: true
                         //@ts-ignore
                     }, [name.start, name.end], code, builder);
-                    if (node.value && !node.value.type.endsWith('Container')) fillIn({}, node.value.range, code, builder);
+                    if (node.value && !node.value.type.endsWith('Container')) fillIn({}, node.value.range as TrimRange, code, builder);
                     //-----------
                     builder.distort(!node.value ? 'null,' : ',', region.end);
                     return;
@@ -178,30 +180,6 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
     }
 }
 
-interface Fillers {
-    prefix?: string;
-    suffix?: string;
-    clear?: boolean;
-    pE?: boolean;
-    sE?: boolean
-}
-
-function fillIn(fillers: Fillers, [start, end]: Range, mainText: string, builder: Displacement) {
-    if (fillers.clear) {
-        for (let i = start; i < end; i++) {
-            const ch = mainText.charAt(1);
-            if (ch === '\n') builder.set(ch, i);
-            else builder.set(' ', i);
-        }
-    } else {
-        for (let i = start; i < end; i++) {
-            builder.set(mainText.charAt(i), i);
-        }
-    }
-
-    if (!util.unset(fillers.prefix)) builder.distort(fillers.prefix + (fillers.pE ? builder.get(start) : ''), start, Offset.PREFIX);
-    if (!util.unset(fillers.suffix)) builder.distort(((fillers.sE ? builder.get(end - 1) : '')) + fillers.suffix, end - 1, fillers.sE ? Offset.SUFFIX : Offset.PREFIX);
-}
 
 export function createTypes(code: string): string {
     if (!code.includes('{@export')) return '';
@@ -271,3 +249,4 @@ function validName(name: string) {
 }
 
 export * from './utils/regions';
+export * from './lib/html'

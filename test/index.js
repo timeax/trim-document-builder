@@ -1,5 +1,5 @@
 // const searcher = require('../dist/utils/displacement').default
-const { build, getRegions } = require('..');
+const { build, getRegions, buildDoc } = require('..');
 const Fs = require('@timeax/utilities').Fs
 
 
@@ -30,19 +30,19 @@ const { builder, doc } = build(getRegions(pathA, cA).regions, pathA, cA);
 
 console.log(doc)
 
-const pos = 43;
-const offset = builder.offsetAt(pos);
-const span = 2;
+// const pos = 43;
+// const offset = builder.offsetAt(pos);
+// const span = 2;
 
-// console.log(doc.slice(builder.offsetAt(offset), builder.offsetAt(offset + 5)));
+// // console.log(doc.slice(builder.offsetAt(offset), builder.offsetAt(offset + 5)));
 
-// console.log(cB.slice(offset, offset + 5))
+// // console.log(cB.slice(offset, offset + 5))
 
-console.log(doc.slice(
-    offset,
-    offset + span
-));
+// console.log(doc.slice(
+//     offset,
+//     offset + span
+// ));
 
-console.log(cA.slice(pos, pos + span))
+// console.log(cA.slice(pos, pos + span))
 
 console.log('passed....')

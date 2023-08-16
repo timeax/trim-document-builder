@@ -9,8 +9,8 @@ export interface Node extends SourceLocation {
     [x: string]: any;
 }
 export interface Region extends SourceLocation {
-    languageId: 'javascript' | 'trim' | 'html';
-    type?: {} | 'container' | 'rule' | 'mix-html' | 'tscript' | 'jsx' | 'attribute' | 'spreadAttr';
+    languageId: 'javascript' | 'trim' | 'html' | 'html-attr';
+    type?: {} | 'container' | 'rule' | 'mix-html' | 'tscript' | 'jsx' | 'attribute' | 'spreadAttr' | 'htmlAttr';
     script?: boolean;
     subType?: {} | 'ImportDeclaration';
 }

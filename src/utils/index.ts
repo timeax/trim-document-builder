@@ -1,23 +1,31 @@
+/// <reference path="../../node_modules/trim-engine/dist/core/init/globals.d.ts" />
+/// <reference path="../../node_modules/trim-engine/dist/lib/globals.d.ts" />
+
 import { TrimOptions, parse } from 'trim-engine/parser';
 import { Fs } from '@timeax/utilities';
 import * as cc from 'charcodes';
 import { Linter } from 'eslint';
 import { Range } from '..';
+import { FileExtensions as extensions } from 'trim-engine/util';
 
 export function getDoc(originalText: string, uri: string): string[] {
     const extension: '.trx' | '.js' | {} = Fs.ext(uri) as any,
         jsDoc = extension === '.trx'
             ? originalText.split(/.|\r|\n/).map(() => ' ')
             : originalText.split('');
-
-    if (extension === '.trx') jsDoc.pop()
+    //------
+    if (extension === '.trx') jsDoc.pop();
     return jsDoc;
+}
+
+export function getDocTrim(originalText: string, uri: string): string[] {
+    return getDoc(originalText, uri + '.trx');
 }
 
 export function getInterfaces(originalText: string, name: string, jsDoc: string[]): string | void {
     const propType = getObject(originalText, name, false);
     // console.log(propType, name)
-    if (propType) jsDoc.push('//----','//-------', propType);
+    if (propType) jsDoc.push('//----', '//-------', propType);
     return propType;
 }
 

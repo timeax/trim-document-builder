@@ -16,8 +16,8 @@ export interface Node extends SourceLocation { type: string, [x: string]: any }
 
 
 export interface Region extends SourceLocation {
-    languageId: 'javascript' | 'trim' | 'html';
-    type?: {} | 'container' | 'rule' | 'mix-html' | 'tscript' | 'jsx' | 'attribute' | 'spreadAttr';
+    languageId: 'javascript' | 'trim' | 'html' | 'html-attr';
+    type?: {} | 'container' | 'rule' | 'mix-html' | 'tscript' | 'jsx' | 'attribute' | 'spreadAttr' | 'htmlAttr';
     script?: boolean;
     subType?: {} | 'ImportDeclaration'
 }
@@ -48,6 +48,7 @@ export function getRegions(uri: string, content: string, filter: string[] = []):
             sourceFile: uri,
             processor: false,
             preserveParens: true,
+            nodelist: true,
             loc: false,
             range: true
         }, content);
@@ -92,6 +93,13 @@ export function getRegions(uri: string, content: string, filter: string[] = []):
                             node.value.styleComponent = true;
                         }
                     }
+
+                    regions.push({
+                        type: 'htmlAttr',
+                        end: node.end,
+                        start: node.start,
+                        languageId: 'html-attr'
+                    })
                 }
             },
 

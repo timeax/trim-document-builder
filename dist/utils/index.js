@@ -1,4 +1,6 @@
 "use strict";
+/// <reference path="../../node_modules/trim-engine/dist/core/init/globals.d.ts" />
+/// <reference path="../../node_modules/trim-engine/dist/lib/globals.d.ts" />
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -23,7 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getObject = exports.getInterfaces = exports.getDoc = void 0;
+exports.getObject = exports.getInterfaces = exports.getDocTrim = exports.getDoc = void 0;
 const parser_1 = require("trim-engine/parser");
 const utilities_1 = require("@timeax/utilities");
 const cc = __importStar(require("charcodes"));
@@ -32,11 +34,16 @@ function getDoc(originalText, uri) {
     const extension = utilities_1.Fs.ext(uri), jsDoc = extension === '.trx'
         ? originalText.split(/.|\r|\n/).map(() => ' ')
         : originalText.split('');
+    //------
     if (extension === '.trx')
         jsDoc.pop();
     return jsDoc;
 }
 exports.getDoc = getDoc;
+function getDocTrim(originalText, uri) {
+    return getDoc(originalText, uri + '.trx');
+}
+exports.getDocTrim = getDocTrim;
 function getInterfaces(originalText, name, jsDoc) {
     const propType = getObject(originalText, name, false);
     // console.log(propType, name)

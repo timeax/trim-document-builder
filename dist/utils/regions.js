@@ -22,6 +22,7 @@ function getRegions(uri, content, filter = []) {
             sourceFile: uri,
             processor: false,
             preserveParens: true,
+            nodelist: true,
             loc: false,
             range: true
         }, content);
@@ -67,6 +68,12 @@ function getRegions(uri, content, filter = []) {
                             node.value.styleComponent = true;
                         }
                     }
+                    regions.push({
+                        type: 'htmlAttr',
+                        end: node.end,
+                        start: node.start,
+                        languageId: 'html-attr'
+                    });
                 }
             },
             TrimElement(node) {
