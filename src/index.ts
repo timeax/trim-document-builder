@@ -1,12 +1,13 @@
 import { Fs, util } from "@timeax/utilities";
 import { getDoc, getInterfaces, getObject } from "./utils";
-import getSearcher from "./utils/displacement";
-import { EmbededRegion, Range, SourceLocation } from "./utils/regions";
+import getSearcher, { Offset } from "./utils/displacement";
+import { EmbededRegion, Range, SourceLocation, UNWANTED } from "./utils/regions";
 import { Elements as em } from 'trim-engine/core';
 import { scanner } from "trim-engine/parser";
 const DEFNAME = '__DefaultExport';
 import * as estree from 'estree';
 import { fillIn } from "./utils/filler";
+const FC = 'CALL_COMPONENT' + UNWANTED;
 
 export function build(regions: EmbededRegion, uri: string, code: string) {
     const jsDoc = getDoc(code, uri);
@@ -20,10 +21,10 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
             switch (region.type) {
                 case 'jsx': {
                     return fillIn({
-                        suffix: '["propTypes"];',
-                        prefix: `type ${region.alias} = typeof `,
-                        pE: true,
-                        sE: true
+                        prefix: FC + '(',
+                        suffix: ',',
+                        sE: true,
+                        pE: true
                     }, range, code, builder);
                 }
 
@@ -69,27 +70,37 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
                 }
 
                 case 'tscript': {
-                    fillIn({ suffix: region.useSuffix ? ';' : undefined, sE: true }, range, code, builder);
                     if (region.subType === 'ImportDeclaration' && region.isUseRule) {
                         let source = region.source;
                         let raw = source.raw;
                         let value = source.value;
-                        if (Fs.ext(value) === '.trx') return;
-                        let name = Fs.name(value);
-                        let fixed = `'${value.slice(0, value.length - name.length) + `_${name}.trx`}';`;
-                        for (let i = 0; i < raw.length; i++) {
-                            jsDoc[i + source.start] = fixed.charAt(i);
-                            if (i === raw.length - 1 && fixed.length > i) {
-                                builder.distort(fixed.substring(i), i + source.start);
+                        if (Fs.ext(value) !== '.trx') {
+                            fillIn({}, [region.start, region.source.start], code, builder);
+                            //----
+                            let name = Fs.name(value);
+                            let fixed = `'${value.slice(0, value.length - name.length) + `_${name}.trx`}`;
+                            for (let i = 0; i < raw.length; i++) {
+                                jsDoc[i + source.start] = fixed.charAt(i);
+                                if (i === raw.length - 1 && fixed.length > i) {
+                                    builder.distort(fixed.substring(i), i + source.start, Offset.SUFFIX);
+                                    builder.distort("';", source.end);
+                                }
                             }
+
+                            return;
                         }
                     }
-                    return;
+
+                    return fillIn({ suffix: region.useSuffix ? ';' : undefined, sE: true }, range, code, builder);
                 }
 
                 case 'mix-html': {
-                    builder.distort('({' + builder.get(region.start), region.start);
-                    builder.distort(`} as ${region.alias});`, region.end - 1);
+                    if (region.hasAttr) builder.distort('{' + builder.get(region.start), region.start);
+                    else {
+                        // console.log(builder.get(region.start - 2), '<regions>')
+                        builder.distort(builder.get(region.start - 2) + '{', region.start - 2, Offset.SUFFIX);
+                    }
+                    builder.distort(`} as typeof ${region.name}['propTypes'])`, region.end - 1);
                     return;
                 }
             }
@@ -173,6 +184,7 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
     });
 
     // console.log(jsDoc.join(''))
+    jsDoc.push(`\ndeclare function ${FC}<T = any>(name: string, props: T): string`)
 
     return {
         doc: jsDoc.join(''),
@@ -249,4 +261,4 @@ function validName(name: string) {
 }
 
 export * from './utils/regions';
-export * from './lib/html'
+export * from './lib/html';

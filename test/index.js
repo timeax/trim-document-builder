@@ -30,18 +30,18 @@ const { builder, doc } = build(getRegions(pathA, cA).regions, pathA, cA);
 
 console.log(doc)
 
-// const pos = 43;
-// const offset = builder.offsetAt(pos);
-// const span = 2;
+const pos = 116;
+const offset = builder.offsetAt(pos);
+const span = 135;
 
-// // console.log(doc.slice(builder.offsetAt(offset), builder.offsetAt(offset + 5)));
+// console.log(doc.slice(builder.offsetAt(offset), builder.offsetAt(offset + 5)));
+console.log(offset)
+console.log(cA.slice(pos, span))
 
-// // console.log(cB.slice(offset, offset + 5))
-
-// console.log(doc.slice(
-//     offset,
-//     offset + span
-// ));
+console.log(doc.slice(
+    offset,
+    builder.offsetAt(span)
+));
 
 // console.log(cA.slice(pos, pos + span))
 

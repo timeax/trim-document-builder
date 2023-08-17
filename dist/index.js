@@ -10,20 +10,31 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
 }));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTypes = exports.build = void 0;
 const utilities_1 = require("@timeax/utilities");
 const utils_1 = require("./utils");
-const displacement_1 = __importDefault(require("./utils/displacement"));
+const displacement_1 = __importStar(require("./utils/displacement"));
+const regions_1 = require("./utils/regions");
 const parser_1 = require("trim-engine/parser");
 const DEFNAME = '__DefaultExport';
 const filler_1 = require("./utils/filler");
+const FC = 'CALL_COMPONENT' + regions_1.UNWANTED;
 function build(regions, uri, code) {
     const jsDoc = (0, utils_1.getDoc)(code, uri);
     const builder = (0, displacement_1.default)(jsDoc);
@@ -37,10 +48,10 @@ function build(regions, uri, code) {
             switch (region.type) {
                 case 'jsx': {
                     return (0, filler_1.fillIn)({
-                        suffix: '["propTypes"];',
-                        prefix: `type ${region.alias} = typeof `,
-                        pE: true,
-                        sE: true
+                        prefix: FC + '(',
+                        suffix: ',',
+                        sE: true,
+                        pE: true
                     }, range, code, builder);
                 }
                 case 'container': {
@@ -82,27 +93,35 @@ function build(regions, uri, code) {
                     }, [region.start + 2, region.end - 2], code, builder);
                 }
                 case 'tscript': {
-                    (0, filler_1.fillIn)({ suffix: region.useSuffix ? ';' : undefined, sE: true }, range, code, builder);
                     if (region.subType === 'ImportDeclaration' && region.isUseRule) {
                         let source = region.source;
                         let raw = source.raw;
                         let value = source.value;
-                        if (utilities_1.Fs.ext(value) === '.trx')
-                            return;
-                        let name = utilities_1.Fs.name(value);
-                        let fixed = `'${value.slice(0, value.length - name.length) + `_${name}.trx`}';`;
-                        for (let i = 0; i < raw.length; i++) {
-                            jsDoc[i + source.start] = fixed.charAt(i);
-                            if (i === raw.length - 1 && fixed.length > i) {
-                                builder.distort(fixed.substring(i), i + source.start);
+                        if (utilities_1.Fs.ext(value) !== '.trx') {
+                            (0, filler_1.fillIn)({}, [region.start, region.source.start], code, builder);
+                            //----
+                            let name = utilities_1.Fs.name(value);
+                            let fixed = `'${value.slice(0, value.length - name.length) + `_${name}.trx`}`;
+                            for (let i = 0; i < raw.length; i++) {
+                                jsDoc[i + source.start] = fixed.charAt(i);
+                                if (i === raw.length - 1 && fixed.length > i) {
+                                    builder.distort(fixed.substring(i), i + source.start, displacement_1.Offset.SUFFIX);
+                                    builder.distort("';", source.end);
+                                }
                             }
+                            return;
                         }
                     }
-                    return;
+                    return (0, filler_1.fillIn)({ suffix: region.useSuffix ? ';' : undefined, sE: true }, range, code, builder);
                 }
                 case 'mix-html': {
-                    builder.distort('({' + builder.get(region.start), region.start);
-                    builder.distort(`} as ${region.alias});`, region.end - 1);
+                    if (region.hasAttr)
+                        builder.distort('{' + builder.get(region.start), region.start);
+                    else {
+                        // console.log(builder.get(region.start - 2), '<regions>')
+                        builder.distort(builder.get(region.start - 2) + '{', region.start - 2, displacement_1.Offset.SUFFIX);
+                    }
+                    builder.distort(`} as typeof ${region.name}['propTypes'])`, region.end - 1);
                     return;
                 }
             }
@@ -184,6 +203,7 @@ function build(regions, uri, code) {
         }
     });
     // console.log(jsDoc.join(''))
+    jsDoc.push(`\ndeclare function ${FC}<T = any>(name: string, props: T): string`);
     return {
         doc: jsDoc.join(''),
         builder

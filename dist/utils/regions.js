@@ -77,7 +77,7 @@ function getRegions(uri, content, filter = []) {
                 }
             },
             TrimElement(node) {
-                var _a, _b, _c;
+                var _a, _b, _c, _d;
                 const name = getName(node);
                 if (name && name.charAt(0) === name.charAt(0).toLowerCase()) {
                     regions.push(Object.assign(Object.assign({}, node), { languageId: 'html', start: node.start, end: node.end, script: hasScript(node) }));
@@ -105,11 +105,19 @@ function getRegions(uri, content, filter = []) {
                         }
                         regions.push({
                             alias,
+                            name,
                             type: 'mix-html',
+                            hasAttr: ((_d = node.openingElement.attributes) === null || _d === void 0 ? void 0 : _d.length) > 0,
                             languageId: 'javascript',
                             end: node.openingElement.end, start: node.openingElement.name.end + 1,
                         });
                     }
+                }
+            },
+            ImportDeclaration(node) {
+                var _a;
+                if (util_1.FileExtensions.isJS(utilities_1.Fs.ext(((_a = node.loc) === null || _a === void 0 ? void 0 : _a.source) || '')) || node.parent.type === 'Program') {
+                    regions.push(Object.assign(Object.assign({ languageId: 'javascript', isUseRule: false }, node), { type: 'tscript', subType: 'ImportDeclaration' }));
                 }
             },
             JsRule(node) {
@@ -119,7 +127,7 @@ function getRegions(uri, content, filter = []) {
                 if ((_c = node.openingElement) === null || _c === void 0 ? void 0 : _c.params) {
                     const region = Object.assign(Object.assign({ languageId: 'javascript', isUseRule: name === 'use', parentName: name }, node.openingElement.params), { type: 'tscript' });
                     regions.push(region);
-                    if (name === 'use' || name === 'import') {
+                    if (name === 'use' || name === 'import' || name === 'require') {
                         region.useSuffix = true;
                         region.subType = 'ImportDeclaration';
                     }

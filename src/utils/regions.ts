@@ -1,7 +1,7 @@
-import { util } from '@timeax/utilities';
+import { Fs, util } from '@timeax/utilities';
 import { transverse } from 'trim-engine/editor';
 import { scanner, parse } from 'trim-engine/parser';
-import { TrimAssets as as } from 'trim-engine/util';
+import { FileExtensions as extensions, TrimAssets as as } from 'trim-engine/util';
 import { Elements as em } from 'trim-engine/core'
 
 export const UNWANTED = '__UNWANTED';
@@ -67,7 +67,7 @@ export function getRegions(uri: string, content: string, filter: string[] = []):
 
     let errors: any = [];
     if (ast.errors) errors = ast.errors;
-    if(ast.nodes) nodes = ast.nodes
+    if (ast.nodes) nodes = ast.nodes
 
     transverse(ast, () => {
         return {
@@ -154,11 +154,25 @@ export function getRegions(uri: string, content: string, filter: string[] = []):
 
                         regions.push({
                             alias,
+                            name,
                             type: 'mix-html',
+                            hasAttr: node.openingElement.attributes?.length > 0,
                             languageId: 'javascript',
                             end: node.openingElement.end, start: node.openingElement.name.end + 1,
                         });
                     }
+                }
+            },
+
+            ImportDeclaration(node) {
+                if (extensions.isJS(Fs.ext(node.loc?.source || '')) || node.parent.type === 'Program') {
+                    regions.push({
+                        languageId: 'javascript',
+                        isUseRule: false,
+                        ...node as unknown as Node,
+                        type: 'tscript',
+                        subType: 'ImportDeclaration',
+                    });
                 }
             },
 
@@ -179,7 +193,7 @@ export function getRegions(uri: string, content: string, filter: string[] = []):
                         type: 'tscript'
                     }
                     regions.push(region);
-                    if (name === 'use' || name === 'import') {
+                    if (name === 'use' || name === 'import' || name === 'require') {
                         region.useSuffix = true;
                         region.subType = 'ImportDeclaration';
                     }

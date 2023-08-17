@@ -2,7 +2,8 @@
 {@import { useSheet } from 'trim.js'}
 {@use { Header } from './components/header'}
 {@use { SearchField } from './components/search'}
-{@import { styles } from './assets/style.js'}
+{@use { About } from './components/about'}
+{@import { styles } from './assets/style'}
 
 {@Router}
     <Html>
@@ -16,6 +17,7 @@
                 <div class="doc-content">
                     {@Routes}
                         <Route element={{<>this is a tests</>}} route='/' />
+                        <Route element={{<About />}} route='/about' />
                     {/Routes}
                 </div>
             </div>
@@ -23,6 +25,6 @@
     </Html>
 {/Router}
 
-<{ 
-    useSheet(styles)
+<{
+    useSheet(styles);
 }>
