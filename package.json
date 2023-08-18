@@ -1,13 +1,14 @@
 {
   "name": "trim-document-builder",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Document builder for vscode",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "link": "npm link trim-engine",
     "prepublishOnly": "npm version patch --no-git-tag-version",
-    "watch": "cd src && tsc -w"
+    "watch": "cd src && tsc -w",
+    "build": "cd src && tsc -b"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,6 @@
     "@timeax/utilities": "^1.1.1",
     "charcodes": "^0.2.0",
     "eslint": "^8.46.0",
-    "trim-engine": "^0.0.7"
+    "trim-engine": "^0.0.8"
   }
 }
