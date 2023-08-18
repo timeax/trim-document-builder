@@ -1,6 +1,7 @@
-{@export 'SearchField', prop}
-    <div class="search__container">
-        {{prop}}
-        <input class="search__input" type="text" placeholder="Search.." />
+{@export 'About'}
+    <div>
+        This is the about page
     </div>
+
+    <{  }>
 {/export}

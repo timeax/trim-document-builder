@@ -34,7 +34,9 @@ const regions_1 = require("./utils/regions");
 const parser_1 = require("trim-engine/parser");
 const DEFNAME = '__DefaultExport';
 const filler_1 = require("./utils/filler");
+const util_1 = require("trim-engine/util");
 const FC = 'CALL_COMPONENT' + regions_1.UNWANTED;
+// const EXPORT = '__'
 function build(regions, uri, code) {
     const jsDoc = (0, utils_1.getDoc)(code, uri);
     const builder = (0, displacement_1.default)(jsDoc);
@@ -181,23 +183,30 @@ function build(regions, uri, code) {
                             else {
                                 if (param.type === 'Identifier' || param.type === 'ObjectExpression' || param.type === 'ArrayExpression')
                                     props = param;
+                                else if (param.type === 'Literal') {
+                                    name = param.value || DEFNAME;
+                                    id = param;
+                                }
                             }
                             if (id) {
-                                (0, filler_1.fillIn)({ prefix: `var _${regions_1.UNWANTED}:`, suffix: ';' }, [id.start, id.end], code, builder);
+                                (0, filler_1.fillIn)({
+                                    prefix: `export ${name == DEFNAME ? 'default' : 'var'} `,
+                                    suffix: `:import('trim.js').FC<${name + 'Props'}> =(${((props === null || props === void 0 ? void 0 : props.start) || -1) < id.start ? ')=>{' : ''}`
+                                }, [id.start, id.end], code, builder);
                             }
                             if (props) {
+                                const b = props.start > ((id === null || id === void 0 ? void 0 : id.start) || 0);
                                 // fillIn({ clear: true }, [opening.start, opening.end], code, builder);
                                 (0, filler_1.fillIn)({
-                                    prefix: `exports.${name}=(`,
-                                    suffix: `:${name})=>{`,
+                                    prefix: !b ? `(` : '',
+                                    suffix: ` ${!b ? 'as' : ':'} ${name}Props${!b ? ')' : ''}${b ? ')=>{' : ';'}`,
                                     pE: true,
                                     sE: true
                                 }, [props.start, props.end], code, builder);
                                 //--------------
-                                (0, utils_1.getInterfaces)(code, name, jsDoc);
-                                // console.log(type)
-                                return builder.distort('}', region.end);
                             }
+                            builder.distort('}', region.end);
+                            return (0, utils_1.getInterfaces)(code, name, jsDoc);
                         }
                     }
                 }
@@ -216,24 +225,10 @@ function build(regions, uri, code) {
     };
 }
 exports.build = build;
-function createTypes(code) {
-    if (!code.includes('{@export'))
-        return '';
-    let exports = getNames(code);
-    //---------
-    // console.log(exports, 'there are a lot')
-    const fromProps = code.match(/exports((\s?|\n?)*)\.((\s?|\n?)*)[^\.]*/gm) || [];
-    const names = new Set([...fromProps, ...exports]);
-    // console.log(names)
-    return Array.from(names).map(item => {
-        const name = item.startsWith('exports.') ? item.trim().slice(7).trim().slice(1) : item;
-        if (!validName(name))
-            return '';
-        const model = (0, utils_1.getObject)(code, name) || '{}';
-        if (name === 'default')
-            return `export default {} as FC<${model}>`;
-        return `export var ${name}: FC<${model}>`;
-    }).join('\n');
+function createTypes(code, uri) {
+    if (!util_1.FileExtensions.supports(utilities_1.Fs.ext(uri)))
+        return code;
+    return build((0, regions_1.getRegions)(uri, code).regions, uri, code);
 }
 exports.createTypes = createTypes;
 function getNames(code) {

@@ -30,7 +30,6 @@ const parser_1 = require("trim-engine/parser");
 const utilities_1 = require("@timeax/utilities");
 const cc = __importStar(require("charcodes"));
 const eslint_1 = require("eslint");
-const __1 = require("..");
 function getDoc(originalText, uri) {
     const extension = utilities_1.Fs.ext(uri), jsDoc = extension === '.trx'
         ? originalText.split(/.|\r|\n/).map(() => ' ')
@@ -57,8 +56,8 @@ function getObject(code, name, replace = true) {
     const regex = RegExp(`(${name}((\\s?|\\n?)*)\\.((\\s?|\\n?)*)propTypes((\\s?|\\n?)*)\\=((\\s?|\\n)*))\\{`);
     const regex2 = RegExp(`${name}((\\s?|\\n?)*)\\.propTypes((\\s?|\\n?)*)\\=((\\s?|\\n)*)`);
     let list = code.match(regex);
-    let prefix = `type ${name} = `;
-    let prefix2 = `type ${name + __1.UNWANTED} = `;
+    let prefix = `type ${name}Props = `;
+    // let prefix2 = `type ${name + UNWANTED} = `
     //-------------
     if (list) {
         list = list.filter(item => item && item.startsWith(name)
@@ -70,13 +69,13 @@ function getObject(code, name, replace = true) {
         let parsed = parseObj(code, [start, end,]);
         let prefix2 = `let _______iididi = `;
         let propType = prefix + typings + parsed;
-        let propType2 = prefix2 + typings + parsed;
+        // let propType2 = prefix2 + typings + parsed;
         //--------
         if (propType.includes('`'))
             propType = adjustProps(propType.replace(prefix, prefix2)).replace(prefix2, prefix);
         return replace
             ? propType.replace(prefix, '')
-            : propType + propType2;
+            : propType;
     }
     if (!replace)
         return prefix + '{children?: any[] | any};';

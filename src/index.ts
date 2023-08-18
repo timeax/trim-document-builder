@@ -1,13 +1,15 @@
 import { Fs, util } from "@timeax/utilities";
 import { getDoc, getInterfaces, getObject } from "./utils";
 import getSearcher, { Offset } from "./utils/displacement";
-import { EmbededRegion, Range, SourceLocation, UNWANTED } from "./utils/regions";
+import { EmbededRegion, Range, SourceLocation, UNWANTED, getRegions } from "./utils/regions";
 import { Elements as em } from 'trim-engine/core';
 import { scanner } from "trim-engine/parser";
 const DEFNAME = '__DefaultExport';
 import * as estree from 'estree';
 import { fillIn } from "./utils/filler";
+import { FileExtensions } from "trim-engine/util";
 const FC = 'CALL_COMPONENT' + UNWANTED;
+// const EXPORT = '__'
 
 export function build(regions: EmbededRegion, uri: string, code: string) {
     const jsDoc = getDoc(code, uri);
@@ -160,24 +162,32 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
                                 });
                             } else {
                                 if (param.type === 'Identifier' || param.type === 'ObjectExpression' || param.type === 'ArrayExpression') props = param as any;
+                                else if (param.type === 'Literal') {
+                                    name = param.value as string || DEFNAME;
+                                    id = param as any;
+                                }
                             }
 
                             if (id) {
-                                fillIn({ prefix: `var _${UNWANTED}:`, suffix: ';' }, [id.start, id.end], code, builder)
+                                fillIn({
+                                    prefix: `export ${name == DEFNAME ? 'default' : 'var'} `,
+                                    suffix: `:import('trim.js').FC<${name + 'Props'}> =(${(props?.start || -1) < id.start ? ')=>{' : ''}`
+                                }, [id.start, id.end], code, builder)
                             }
                             if (props) {
+                                const b = props.start > (id?.start || 0);
                                 // fillIn({ clear: true }, [opening.start, opening.end], code, builder);
                                 fillIn({
-                                    prefix: `exports.${name}=(`,
-                                    suffix: `:${name})=>{`,
+                                    prefix: !b ? `(` : '',
+                                    suffix: ` ${!b ? 'as' : ':'} ${name}Props${!b ? ')' : ''}${b ? ')=>{' : ';'}`,
                                     pE: true,
                                     sE: true
                                 }, [props.start, props.end], code, builder);
                                 //--------------
-                                getInterfaces(code, name, jsDoc);
-                                // console.log(type)
-                                return builder.distort('}', region.end);
                             }
+                            
+                            builder.distort('}', region.end);
+                            return getInterfaces(code, name, jsDoc);
                         }
                     }
                 }
@@ -200,23 +210,9 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
 }
 
 
-export function createTypes(code: string): string {
-    if (!code.includes('{@export')) return '';
-    let exports = getNames(code);
-    //---------
-    // console.log(exports, 'there are a lot')
-    const fromProps = code.match(/exports((\s?|\n?)*)\.((\s?|\n?)*)[^\.]*/gm) || [];
-
-    const names = new Set<string>([...fromProps, ...exports]);
-    // console.log(names)
-
-    return Array.from(names).map(item => {
-        const name = item.startsWith('exports.') ? item.trim().slice(7).trim().slice(1) : item;
-        if (!validName(name)) return '';
-        const model = getObject(code, name) || '{}';
-        if (name === 'default') return `export default {} as FC<${model}>`
-        return `export var ${name}: FC<${model}>`
-    }).join('\n')
+export function createTypes(code: string, uri: string) {
+    if (!FileExtensions.supports(Fs.ext(uri))) return code;
+    return build(getRegions(uri, code).regions, uri, code);
 }
 
 
