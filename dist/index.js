@@ -163,14 +163,17 @@ function build(regions, uri, code) {
                         }
                         case 'export': {
                             let name = DEFNAME;
+                            let id;
                             let props = undefined;
                             // console.log(params);
                             const param = params.body;
                             if (param.type === 'SequenceExpression') {
                                 param.expressions.forEach(item => {
                                     // console.log(item)
-                                    if (item.type === 'Literal')
+                                    if (item.type === 'Literal') {
                                         name = item.value || DEFNAME;
+                                        id = item;
+                                    }
                                     if (item.type === 'Identifier' || item.type === 'ObjectExpression' || item.type === 'ArrayExpression')
                                         props = item;
                                 });
@@ -178,6 +181,9 @@ function build(regions, uri, code) {
                             else {
                                 if (param.type === 'Identifier' || param.type === 'ObjectExpression' || param.type === 'ArrayExpression')
                                     props = param;
+                            }
+                            if (id) {
+                                (0, filler_1.fillIn)({ prefix: `var _${regions_1.UNWANTED}:`, suffix: ';' }, [id.start, id.end], code, builder);
                             }
                             if (props) {
                                 // fillIn({ clear: true }, [opening.start, opening.end], code, builder);
@@ -188,7 +194,7 @@ function build(regions, uri, code) {
                                     sE: true
                                 }, [props.start, props.end], code, builder);
                                 //--------------
-                                const type = (0, utils_1.getInterfaces)(code, name, jsDoc);
+                                (0, utils_1.getInterfaces)(code, name, jsDoc);
                                 // console.log(type)
                                 return builder.distort('}', region.end);
                             }

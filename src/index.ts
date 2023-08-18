@@ -145,19 +145,26 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
 
                         case 'export': {
                             let name: string = DEFNAME;
+                            let id: em.text | undefined;
                             let props: ((estree.Identifier | estree.ArrayExpression | estree.ObjectExpression) & SourceLocation) | undefined = undefined;
                             // console.log(params);
                             const param = (params as { body: estree.Expression }).body;
                             if (param.type === 'SequenceExpression') {
                                 param.expressions.forEach(item => {
                                     // console.log(item)
-                                    if (item.type === 'Literal') name = item.value as string || DEFNAME;
+                                    if (item.type === 'Literal') {
+                                        name = item.value as string || DEFNAME;
+                                        id = item as any;
+                                    }
                                     if (item.type === 'Identifier' || item.type === 'ObjectExpression' || item.type === 'ArrayExpression') props = item as any;
                                 });
                             } else {
                                 if (param.type === 'Identifier' || param.type === 'ObjectExpression' || param.type === 'ArrayExpression') props = param as any;
                             }
 
+                            if (id) {
+                                fillIn({ prefix: `var _${UNWANTED}:`, suffix: ';' }, [id.start, id.end], code, builder)
+                            }
                             if (props) {
                                 // fillIn({ clear: true }, [opening.start, opening.end], code, builder);
                                 fillIn({
@@ -167,7 +174,7 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
                                     sE: true
                                 }, [props.start, props.end], code, builder);
                                 //--------------
-                                const type = getInterfaces(code, name, jsDoc);
+                                getInterfaces(code, name, jsDoc);
                                 // console.log(type)
                                 return builder.distort('}', region.end);
                             }

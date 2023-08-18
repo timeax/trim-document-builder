@@ -5,7 +5,7 @@ import { TrimOptions, parse } from 'trim-engine/parser';
 import { Fs } from '@timeax/utilities';
 import * as cc from 'charcodes';
 import { Linter } from 'eslint';
-import { Range } from '..';
+import { Range, UNWANTED } from '..';
 import { FileExtensions as extensions } from 'trim-engine/util';
 
 export function getDoc(originalText: string, uri: string): string[] {
@@ -25,7 +25,7 @@ export function getDocTrim(originalText: string, uri: string): string[] {
 export function getInterfaces(originalText: string, name: string, jsDoc: string[]): string | void {
     const propType = getObject(originalText, name, false);
     // console.log(propType, name)
-    if (propType) jsDoc.push('//----', '//-------', propType);
+    if (propType) jsDoc.push('\n', '\n', propType);
     return propType;
 }
 
@@ -34,6 +34,7 @@ export function getObject(code: string, name: string, replace = true): string | 
     const regex2 = RegExp(`${name}((\\s?|\\n?)*)\\.propTypes((\\s?|\\n?)*)\\=((\\s?|\\n)*)`)
     let list = code.match(regex) as string[] | undefined;
     let prefix = `type ${name} = `
+    let prefix2 = `type ${name+UNWANTED} = `
     //-------------
     if (list) {
         list = list.filter(item => item && item.startsWith(name)
@@ -48,12 +49,13 @@ export function getObject(code: string, name: string, replace = true): string | 
         let parsed = parseObj(code, [start, end,])
         let prefix2 = `let _______iididi = `
         let propType = prefix + typings + parsed;
+        let propType2 = prefix2 + typings + parsed;
         //--------
         if (propType.includes('`')) propType = adjustProps(propType.replace(prefix, prefix2)).replace(prefix2, prefix);
 
         return replace
             ? propType.replace(prefix, '')
-            : propType;
+            : propType + propType2;
     }
 
     if (!replace) return prefix + '{children?: any[] | any};';
