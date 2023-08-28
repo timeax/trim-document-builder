@@ -1,6 +1,6 @@
 {
   "name": "trim-document-builder",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Document builder for vscode",
   "main": "dist/index.js",
   "scripts": {
@@ -29,6 +29,6 @@
     "@timeax/utilities": "^1.1.1",
     "charcodes": "^0.2.0",
     "eslint": "^8.46.0",
-    "trim-engine": "^0.0.8"
+    "trim-engine": "^0.0.9"
   }
 }
