@@ -1,7 +1,34 @@
-{@export 'About'}
-    <div>
-        This is the about page
-    </div>
+{@import { Html, Head, Route } from 'trim.js/nodes'}
+{@import { useSheet } from 'trim.js'}
+{@use { Header } from './components/header'}
+{@use { SearchField } from './components/search'}
+{@use { About } from './components/about'}
+{@import { styles } from './assets/style.js'}
+{@require { test } from 'trim.js'}
 
-    <{  }>
-{/export}
+{@Router}
+    <Html>
+        <Head title={{'Trim Docs'}} />
+        <body>
+            <Header />
+            <div class="content-area">
+                <aside>
+                    <SearchField children={{<About key=''/>}} />
+                </aside>
+                <div class="doc-content">
+                    {(): string => {
+
+                    }}
+                    {@Routes}
+                        <Route element={{<>this is a tests</>}} route='/' />
+                        <Route element={{<About />}} route='/about' />
+                    {/Routes}
+                </div>
+            </div>
+        </body>
+    </Html>
+{/Router}
+
+<{
+    useSheet(styles);
+}>

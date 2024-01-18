@@ -1,12 +1,9 @@
-/// <reference path="../../node_modules/trim-engine/dist/core/init/globals.d.ts" />
-/// <reference path="../../node_modules/trim-engine/dist/lib/globals.d.ts" />
-
+//@ts-nocheck
 import { TrimOptions, parse } from 'trim-engine/parser';
 import { Fs } from '@timeax/utilities';
 import * as cc from 'charcodes';
 import { Linter } from 'eslint';
-import { Range, UNWANTED } from '..';
-import { FileExtensions as extensions } from 'trim-engine/util';
+import { Range } from '..';
 
 export function getDoc(originalText: string, uri: string): string[] {
     const extension: '.trx' | '.js' | {} = Fs.ext(uri) as any,
@@ -22,19 +19,18 @@ export function getDocTrim(originalText: string, uri: string): string[] {
     return getDoc(originalText, uri + '.trx');
 }
 
-export function getInterfaces(originalText: string, name: string, jsDoc: string[]): string | void {
-    const propType = getObject(originalText, name, false);
+export function getInterfaces(originalText: string, name: string, jsDoc: string[], type: 'js' | 'ts' = 'js'): string | void {
+    const propType = getObject(originalText, name, false, type);
     // console.log(propType, name)
     if (propType) jsDoc.push('\n', '\n', propType);
     return propType;
 }
 
-export function getObject(code: string, name: string, replace = true): string | void {
+export function getObject(code: string, name: string, replace = true, type: 'js' | 'ts'): string | void {
     const regex = RegExp(`(${name}((\\s?|\\n?)*)\\.((\\s?|\\n?)*)propTypes((\\s?|\\n?)*)\\=((\\s?|\\n)*))\\{`);
     const regex2 = RegExp(`${name}((\\s?|\\n?)*)\\.propTypes((\\s?|\\n?)*)\\=((\\s?|\\n)*)`)
     let list = code.match(regex) as string[] | undefined;
     let prefix = `type ${name}Props = `
-    // let prefix2 = `type ${name + UNWANTED} = `
     //-------------
     if (list) {
         list = list.filter(item => item && item.startsWith(name)
@@ -58,7 +54,7 @@ export function getObject(code: string, name: string, replace = true): string | 
             : propType;
     }
 
-    if (!replace) return prefix + '{children?: any[] | any};';
+    if (!replace && type === 'js') return prefix + '{children?: any[] | any};';
 }
 
 enum Context {

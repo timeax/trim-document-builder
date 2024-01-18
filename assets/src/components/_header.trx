@@ -1,15 +1,86 @@
+{@import { useSheet } from 'trim.js'}
+{@import { colors } from '../assets/index'}
+{@use { Input } from './Input'}
 {@export 'Header'}
     <header>
-        <div class="container">
-            <div class="nav">
-                <div class="iconbox">
-                    icon
+        <nav class="navbar">
+            <div class="container">
+                <h1 class="navbar-brand">TDocs</h1>
+                <div class="nav">
+                    {{routes.map(item =>  {
+                        return (
+                            <li class="nav-item">
+                                <a href={{item.route}} class="nav-link">{{item.name}}</a>
+                            </li>
+                        )
+                    })}}
                 </div>
-
-                <div class="nav2"></div>
+                <div class="nav nav2">
+                    <input type="text" placeholder="Search Docs" />
+                    <li class="nav-item btn btn-sm btn-outlined">
+                        <a href="/" class="nav-link">ChangeLog</a>
+                    </li>
+                    <li class="nav-item btn btn-danger btn-sm">
+                        <a href="/" class="nav-link">Donate</a>
+                    </li>
+                </div>
+                <Input key sx={{{}}}></Input>
             </div>
-        </div>
+        </nav>
     </header>
 
-    <{  }>
+    <{
+        useSheet(style);
+    }>
 {/export}
+
+<{
+
+    const style = {
+        '.btn-outlined': {
+            border: '1px solid red'
+        },
+
+        header: {
+            'a.nav-link': {
+                fontWeight: '700 !important',
+                color: 'black   '
+            },
+            '.nav2': {
+                '.nav-item': {
+                    marginLeft: '1.4rem',
+                    '&.btn-danger .nav-link': {
+                        color: 'white'
+                    }
+                }
+            }
+        }
+    }
+
+    function NavButtons({ inner: inner }) {
+        return (
+            <span class="nav-button">
+                {{inner}}
+            </span>
+        )
+
+    }
+
+    const routes = [
+        {
+            name: 'Home',
+            route: '/',
+            id: 'home'
+        },
+        {
+            name: 'Docs',
+            route: '/docs',
+            id: 'docs'
+        },
+        {
+            name: 'Github',
+            route: '/git',
+            id: 'github'
+        }
+    ]
+}>

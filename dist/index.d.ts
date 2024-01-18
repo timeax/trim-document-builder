@@ -3,7 +3,7 @@ export declare function build(regions: EmbededRegion, uri: string, code: string)
     doc: string;
     builder: import("./utils/displacement").Displacement;
 };
-export declare function createTypes(code: string, uri: string): string | {
+export declare function createTypes(code: string, uri: string, type?: 'js' | 'ts'): string | {
     doc: string;
     builder: import("./utils/displacement").Displacement;
 };

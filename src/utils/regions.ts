@@ -1,11 +1,16 @@
+//@ts-nocheck
 import { Fs, util } from '@timeax/utilities';
 import { transverse } from 'trim-engine/editor';
-import { scanner, parse } from 'trim-engine/parser';
+import { scanner, parse as jsParse, TrimOptions } from 'trim-engine/parser';
+import trim from 'trim-engine/parser/plugin';
+import * as acorn from 'acorn';
 import { FileExtensions as extensions, TrimAssets as as } from 'trim-engine/util';
 import { Elements as em } from 'trim-engine/core'
+import { tsPlugin } from '@timeax/acorn-typescript';
+import { AST } from 'eslint';
 
 export const UNWANTED = '__UNWANTED';
-export interface SourceLocation extends Any {
+export interface SourceLocation extends Dynamic {
     start: number;
     end: number;
 }
@@ -19,7 +24,8 @@ export interface Region extends SourceLocation {
     languageId: 'javascript' | 'trim' | 'html' | 'html-attr';
     type?: {} | 'container' | 'rule' | 'mix-html' | 'tscript' | 'jsx' | 'attribute' | 'spreadAttr' | 'htmlAttr';
     script?: boolean;
-    subType?: {} | 'ImportDeclaration'
+    subType?: {} | 'ImportDeclaration';
+    [x: string]: any
 }
 
 export type EmbededRegion = Region[] & {
@@ -27,7 +33,8 @@ export type EmbededRegion = Region[] & {
         name: string,
         alias: string;
         source: string;
-    }[]
+    }[],
+    type?: 'js' | 'ts'
 }
 
 global.TrimVsCode = {
@@ -35,23 +42,17 @@ global.TrimVsCode = {
     started: false
 }
 
-export function getRegions(uri: string, content: string, filter: string[] = []): RegionList {
+export function getRegions(uri: string, content: string, options: Options = {}): RegionList {
     const regions: EmbededRegion = [];
     regions.nameList = [];
     let nodes = [] as string[];
     //----
     let ast: any;
+    regions.type = options.type || 'js';
 
     util.avoid(() => {
-        ast = parse({
-            ecmaVersion: 'latest',
-            sourceFile: uri,
-            processor: false,
-            preserveParens: true,
-            nodelist: true,
-            loc: false,
-            range: true
-        }, content);
+        ast = parse(content, { sourceFile: uri, type: options.type || 'js' })
+        // console.log(ast)
     }).then((e) => {
         if (e) {
             ast = scanner({
@@ -68,7 +69,7 @@ export function getRegions(uri: string, content: string, filter: string[] = []):
     let errors: any = [];
     if (ast.errors) errors = ast.errors;
     if (ast.nodes) nodes = ast.nodes
-
+    //@ts-ignore
     transverse(ast, () => {
         return {
             Scriptlet(node: Node) {
@@ -103,6 +104,16 @@ export function getRegions(uri: string, content: string, filter: string[] = []):
                 }
             },
 
+            TrimFragment(node) {
+                regions.push({
+                    ...node,
+                    languageId: 'trim',
+                    start: node.start,
+                    type: 'mix-html',
+                    end: node.end
+                })
+            },
+
             TrimElement(node: Node) {
                 const name = getName(node);
                 if (name && name.charAt(0) === name.charAt(0).toLowerCase()) {
@@ -134,6 +145,7 @@ export function getRegions(uri: string, content: string, filter: string[] = []):
                             languageId: 'javascript',
                             start, end,
                             type: 'jsx',
+                            closing: node.closingElement,
                             alias, name
                         });
 
@@ -141,7 +153,7 @@ export function getRegions(uri: string, content: string, filter: string[] = []):
                         regions.nameList?.push({ name, alias, source: uri + [start, end] })
 
                         if ((node.openingElement.attributes?.length || -1) > 0) {
-                            (node as em.trimElement).openingElement.attributes?.forEach((item) => {
+                            (node as unknown as em.trimElement).openingElement.attributes?.forEach((item) => {
                                 (item as any).isComponent = true;
                                 regions.push({
                                     languageId: 'javascript',
@@ -256,13 +268,59 @@ function getName(node: any): string | null {
     return node.openingElement?.name?.name;
 }
 
-function useSuffix(node: Node | undefined) {
-    if (node === undefined || node === null || !['JsContainer', 'AlpineContainer'].includes(node.type)) return true;
-    return false
-}
-
 function hasScript(node: Any) {
     return node.children?.some((item: Any) => 'Scriptlet' === item.type);
 }
 
 //, 'JsContainer', 'AlpineContainer'
+
+
+const start = {
+    trim: null as unknown as typeof acorn.Parser,
+    get parser() {
+        if (!this.trim) {
+            this.trim = acorn.Parser.extend(tsPlugin() as any, trim({
+                processor: false,
+                ignore: true
+            }) as any) as any;
+        };
+
+        return this.trim;
+    }
+}
+
+interface Options {
+    type?: 'js' | 'ts';
+}
+
+export function parse(input: string, options: { sourceFile: string, type: 'js' | 'ts' }): AST.Program {
+    const parserOptions: TrimOptions = {
+        ecmaVersion: 'latest',
+        sourceFile: options.sourceFile,
+        processor: false,
+        preserveParens: true,
+        nodelist: true,
+        sourceType: 'module',
+        loc: true,
+        range: true
+    }
+
+
+    if (options.type === 'js') {
+        let ast;
+        util.avoid(() => {
+            ast = jsParse(parserOptions, input);
+        }).then((e) => {
+            if (e) {
+                ast = scanner(parserOptions, input);
+            }
+        });
+
+        return ast as any;
+    }
+
+    const Base = start.parser;
+    //@ts-ignore------
+    const parser = new Base(parserOptions, input);
+    return parser.parse() as any;
+}

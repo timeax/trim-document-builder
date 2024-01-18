@@ -13,7 +13,7 @@ export interface Displacement {
      * Returns an Position Object
      * @param offset offset from the original text
      */
-    positionAt(offset: number | ((arg: Distortion) => boolean)): DisplacedPosition | undefined;
+    positionAt(offset: number | ((arg: Distortion, next?: Distortion, prev?: Distortion[], isLast?: boolean) => boolean)): DisplacedPosition | undefined;
     /**
      * Returns number showing the equivalent offset in original document content
      * @param offset offset from edited document
@@ -46,13 +46,21 @@ export interface Distortion {
     displacement: number;
     offset: number;
     pos: Offset;
+    content?: string;
+    extra?: DistortionType;
 }
 interface DisplacedPosition extends Position {
     origin: number;
 }
+type DistortionSize = Array<Offset.PREFIX | Offset.SUFFIX>;
+interface DistortionType {
+    type: DistortionSize;
+    size: number[];
+}
 export declare enum Offset {
-    SUFFIX = 0,
-    PREFIX = 1
+    PREFIX = 0,
+    SUFFIX = 1,
+    NONE = 2
 }
 export default function (jsDoc: string[]): Displacement;
 export {};

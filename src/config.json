@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+    
+      "target": "ESNext",                                  /* Set the JavaScript language version for 
+  
+      /* Modules */
+      "module": "NodeNext",                                /* Specify what module code is generated. */
+      // "rootDir": "./",                                  /* Specify the root folder within your source files. */
+      "moduleResolution": "NodeNext",                   
+      "types": [
+        "./globals.d.ts"
+      ],                                      /* Specify type package names to be included without being referenced in a source file. */
+      "resolveJsonModule": true,                        /* Enable importing .json files. */
+      /* Emit */
+      "declaration": true,                              /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
+      // "declarationMap": true,                           /* Create sourcemaps for d.ts files. */
+      // "emitDeclarationOnly": true,                      /* Only output d.ts files and not JavaScript files. */
+      "sourceMap": true,                                /* Create source map files for emitted JavaScript files. */
+      // "inlineSourceMap": true,                          /* Include sourcemap files inside the emitted JavaScript. */
+      // "outFile": "./",                                  /* Specify a file that bundles all outputs into one JavaScript file. If 'declaration' is true, also designates a file that bundles all .d.ts output. */
+      "outDir": "../dist",                                   /* Specify an output folder for all 
+      "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
+      // "preserveSymlinks": true,                         /* Disable resolving symlinks to their realpath. This correlates to the same flag in node. */
+      "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+  
+      /* Type Checking */
+      "strict": false,                                      /* Enable all strict type-checking options. */
+      // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
+      "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
+    },
+  
+    "exclude": [
+      "../../trim-engine"
+    ]
+  }
+  

@@ -3,3 +3,5 @@ declare var TrimVsCode: {
     stopScanner: boolean;
     started: boolean;
 }
+
+type Dynamic = Any

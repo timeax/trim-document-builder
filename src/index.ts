@@ -1,19 +1,21 @@
+//@ts-nocheck
+
 import { Fs, util } from "@timeax/utilities";
-import { getDoc, getInterfaces, getObject } from "./utils";
+import { getDoc, getInterfaces } from "./utils";
 import getSearcher, { Offset } from "./utils/displacement";
 import { EmbededRegion, Range, SourceLocation, UNWANTED, getRegions } from "./utils/regions";
 import { Elements as em } from 'trim-engine/core';
-import { scanner } from "trim-engine/parser";
 const DEFNAME = '__DefaultExport';
 import * as estree from 'estree';
 import { fillIn } from "./utils/filler";
-import { FileExtensions } from "trim-engine/util";
+import { FileExtensions as exts } from "trim-engine/util";
 const FC = 'CALL_COMPONENT' + UNWANTED;
 // const EXPORT = '__'
 
 export function build(regions: EmbededRegion, uri: string, code: string) {
     const jsDoc = getDoc(code, uri);
     const builder = getSearcher(jsDoc);
+    const isTrx = exts.isTrx(Fs.ext(uri));
     //---
     regions.forEach(region => {
         if (region.languageId === 'html-attr') return;
@@ -49,7 +51,7 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
 
                 case 'attribute': {
                     const node = region as unknown as em.attributes;
-                    const name = node.name;
+                    const name = node.name, value = node.value;
                     //----
                     fillIn({
                         prefix: "'",
@@ -58,9 +60,13 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
                         sE: true
                         //@ts-ignore
                     }, [name.start, name.end], code, builder);
-                    if (node.value && !node.value.type.endsWith('Container')) fillIn({}, node.value.range as TrimRange, code, builder);
+                    if (util.unset(value)) {
+                        //@ts-ignore
+                        builder.distort(builder.get(name.end - 1) + 'null,', name.end - 1, Offset.SUFFIX)
+                    } else if (!value.type.endsWith('Container')) {
+                        fillIn({ suffix: ',', sE: true }, value.range as TrimRange, code, builder);
+                    }
                     //-----------
-                    builder.distort(!node.value ? 'null,' : ',', region.end);
                     return;
                 }
 
@@ -97,12 +103,9 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
                 }
 
                 case 'mix-html': {
-                    if (region.hasAttr) builder.distort('{' + builder.get(region.start), region.start);
-                    else {
-                        // console.log(builder.get(region.start - 2), '<regions>')
-                        builder.distort(builder.get(region.start - 2) + '{', region.start - 2, Offset.SUFFIX);
-                    }
-                    builder.distort(`} as typeof ${region.name}['propTypes'])`, region.end - 1);
+                    builder.distort(builder.get(region.start - 2) + '{', region.start - 2, Offset.SUFFIX);
+
+                    builder.distort(`} as typeof ${region.name}['propTypes'])`, region.end - 1, Offset.SUFFIX);
                     return;
                 }
             }
@@ -116,17 +119,20 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
                 if (opening?.name.name) {
                     switch (opening.name.name) {
                         case 'use': {
-                            return builder.distort('import', region.start + 2);
+                            return builder.distort('import', region.start + 2, Offset.PREFIX);
                         }
 
                         case 'require': {
-                            return builder.distort('import', region.start + 2);
+                            return builder.distort('import', region.start + 2, Offset.PREFIX);
                         }
 
                         case 'import': {
                             const len = region.start + 2;
                             let i = len;
                             while (i < len + 6) jsDoc[i] = 'import'.charAt(i - len), i++;
+                            if (isTrx) {
+
+                            }
                             return;
                         }
 
@@ -138,6 +144,18 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
                             builder.distort('){', opening.end);
                             jsDoc[region.end] = '}';
                             return;
+                        }
+
+                        case 'switch': {
+                            break;
+                        }
+
+                        case 'case': {
+                            break;
+                        }
+
+                        case 'default': {
+                            break;
                         }
 
                         case 'for': {
@@ -185,9 +203,9 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
                                 }, [props.start, props.end], code, builder);
                                 //--------------
                             }
-                            
+
                             builder.distort('}', region.end);
-                            return getInterfaces(code, name, jsDoc);
+                            return getInterfaces(code, name, jsDoc, regions.type);
                         }
                     }
                 }
@@ -195,8 +213,8 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
         }
 
         if (region.script) {
-            builder.distort('{' + builder.get(region.start), region.start)
-            builder.distort(builder.get(region.end) + '}', region.end)
+            builder.distort('{' + builder.get(region.start), region.start, Offset.PREFIX)
+            builder.distort(builder.get(region.end) + '}', region.end, Offset.SUFFIX)
         }
     });
 
@@ -210,58 +228,14 @@ export function build(regions: EmbededRegion, uri: string, code: string) {
 }
 
 
-export function createTypes(code: string, uri: string) {
-    if (!FileExtensions.supports(Fs.ext(uri))) return code;
-    return build(getRegions(uri, code).regions, uri, code);
+export function createTypes(code: string, uri: string, type: 'js' | 'ts' = 'ts') {
+    if (!exts.supports(Fs.ext(uri))) return code;
+    return build(getRegions(uri, code, { type }).regions, uri, code);
 }
 
 
-function getNames(code: string) {
-    const names = new Set<string>();
-    util.avoid(() => {
-        const ast = scanner({
-            processor: false,
-            range: true,
-            sourceFile: 'index.trx',
-            ecmaVersion: 'latest',
-        }, code);
-
-        ast?.body?.forEach(item => {
-            if (item.type === 'JsRule' && item.openingElement.name?.name === 'export') {
-                const params = item.openingElement.params?.body;
-                const parseParams = (params: any) => {
-                    switch (params.type) {
-                        case "AssignmentExpression": {
-                            if (params.left.type === 'Identifier' && params.left.name === 'name') {
-                                if (params.right.type === 'Literal') names.add(params.right.value as string);
-                            }
-                            break;
-                        }
-                        case "Literal": {
-                            names.add(params.value as string)
-                            break;
-                        }
-                    }
-                }
-                //----
-                if (params)
-                    if (params.type == 'AssignmentExpression'
-                        || params.type == 'Identifier'
-                        || params.type === 'Literal'
-                        || params.type === 'ObjectExpression')
-                        parseParams(params);
-                    else if (params.type === 'SequenceExpression') params.expressions.forEach((item: any) => parseParams(item as any));
-            }
-        });
-    });
-
-    return Array.from(names);
-}
 
 
-function validName(name: string) {
-    return true;
-}
 
 export * from './utils/regions';
 export * from './lib/html';
